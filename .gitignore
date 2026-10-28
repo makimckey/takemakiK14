@@ -1,0 +1,164 @@
+# === Python Byte-compiled / optimized / DLL files ===
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Rope / Spyder / IDEs
+.spyderproject
+.spyproject
+.ropeproject
+.pyre/
+.pytype/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+cython_debug/
+
+# === LaTeX intermediate files ===
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# === OS / Editor ===
+.DS_Store
+.idea/
+.vscode/
+
+# === Research Lab Policy ===
+# 🚫 生体信号ファイルは禁止
+*.edf
+*.bdf
+*.bin
+*.rml
+
+# 🚫 音声ファイルは禁止
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.aac
+
+# 🚫 実験データ形式禁止 (NumPy, MATLAB, SPSS, HDF5)
+*.npz
+*.npy
+*.mat
+*.sav
+*.h5
+
+# 🚫 大容量Office系（原則アップロード禁止）
+*.pptx
+*.docx
+*.xlsm
+
+# 🚫 画像ファイル（リポジトリ保存禁止）
+*.png
+*.eps
+*.tif
+*.tiff
+*.svg
+
+# 🚫 機械学習モデルファイル（Pickle/Joblib/PyTorch）
+*.pkl
+*.pickle
+*.joblib
+*.pt
+*.pth
+
+# === Experiment results (ignored by default) ===
+results/

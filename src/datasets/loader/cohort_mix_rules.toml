@@ -1,0 +1,14 @@
+[validation]
+enabled = true
+check_scoring_rule_for_supervised_stage = true
+
+[shared_signal_requirements]
+EEG = "error"
+EOG = "warning"
+EMG = "warning"
+
+# Optional explicit blacklist for known-bad combinations.
+# The rule triggers when all listed cohorts are included in the same merged load.
+# [[forbid_pair]]
+# cohorts = ["iiis47", "sleep-edf-cassette"]
+# reason = "Known incompatible cohort combination."

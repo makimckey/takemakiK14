@@ -1,0 +1,143 @@
+name: Guard required files and folders (push-only, loud notice)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  check-required:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      # GitHub公式アクション（フル長SHAで固定）
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Check required files and folders exist
+        id: check
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          # --- 1) 設定のロード（.github/required-paths.txt があれば上書き） ---
+          REQUIRED_FILES=()
+          REQUIRED_DIRS=()
+
+          if [[ -f ".github/required-paths.txt" ]]; then
+            while IFS= read -r line; do
+              # 空行・コメントはスキップ
+              [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+              # 前後空白を除去
+              line="${line#"${line%%[![:space:]]*}"}"
+              line="${line%"${line##*[![:space:]]}"}"
+              [[ -z "$line" ]] && continue
+
+              if [[ "$line" == */ ]]; then
+                REQUIRED_DIRS+=("${line%/}")
+              else
+                REQUIRED_FILES+=("$line")
+              fi
+            done < ".github/required-paths.txt"
+          else
+            # デフォルト
+            REQUIRED_FILES=( README.md LICENSE requirements.txt .gitignore .editorconfig )
+            REQUIRED_DIRS=( src exercise_report final_report )
+          fi
+
+          # --- 2) 使われた設定をサマリに表示（デバッグ用） ---
+          {
+            echo "### Required items check"
+            echo
+            echo "<details><summary>Config used</summary>"
+            echo
+            echo "**Files**"
+            for f in "${REQUIRED_FILES[@]:-}"; do echo "- \`$f\`"; done
+            echo
+            echo "**Directories**"
+            for d in "${REQUIRED_DIRS[@]:-}"; do echo "- \`$d/\`"; end=${d}; done
+            echo
+            echo "</details>"
+            echo
+            echo "| Path | Type | Status |"
+            echo "|------|------|--------|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          missing_list=()
+
+          # --- 3) ファイルチェック ---
+          for f in "${REQUIRED_FILES[@]:-}"; do
+            if [[ -f "$f" ]]; then
+              if [[ -s "$f" ]]; then
+                echo "| \`$f\` | File | ✅ Found |" >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "| \`$f\` | File | ⚠️ Empty |" >> "$GITHUB_STEP_SUMMARY"
+                echo "::warning file=$f::File exists but is empty: $f"
+              fi
+            else
+              echo "| \`$f\` | File | ❌ Missing |" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error file=$f::Required file missing: $f"
+              missing_list+=("$f")
+            fi
+          done
+
+          # --- 4) ディレクトリチェック（存在のみ） ---
+          for d in "${REQUIRED_DIRS[@]:-}"; do
+            if [[ -d "$d" ]]; then
+              echo "| \`$d/\` | Directory | ✅ Found |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| \`$d/\` | Directory | ❌ Missing |" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error file=$d::Required directory missing: $d"
+              missing_list+=("$d/")
+            fi
+          done
+
+          # --- 5) 結果をoutputsへ ---
+          if (( ${#missing_list[@]} )); then
+            printf 'missing=%s\n' "$(printf '%s,' "${missing_list[@]}" | sed 's/,$//')" >> "$GITHUB_OUTPUT"
+            exit 1
+          else
+            echo "missing=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open or update Issue (assign pusher)
+        if: ${{ failure() && github.event_name == 'push' }}
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7.x pinned
+        with:
+          script: |
+            const files = '${{ steps.check.outputs.missing }}'.split(',').filter(Boolean);
+            const { owner, repo } = context.repo;
+            const branch = context.ref.replace('refs/heads/','');
+            const sha = context.sha.slice(0,7);
+            const actor = context.actor;
+
+            const title = `Required items missing on ${branch} @ ${sha}`;
+            const body = [
+              '## 🚨 Required files/folders are missing',
+              '',
+              'The following required items were not found on push:',
+              '',
+              ...files.map(f => `- \`${f}\``),
+              '',
+              `Commit: \`${context.sha}\` by @${actor}`,
+              '',
+              '> Please restore these items. This issue was created automatically.'
+            ].join('\n');
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner, repo, state: 'open', labels: 'ci/missing-files'
+            });
+            const existing = issues.find(i => i.title.startsWith('Required items missing on'));
+
+            if (existing) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: existing.number, body });
+              await github.rest.issues.addAssignees({ owner, repo, issue_number: existing.number, assignees: [actor] });
+            } else {
+              await github.rest.issues.create({
+                owner, repo,
+                title, body,
+                labels: ['ci/missing-files'],
+                assignees: [actor]
+              });
+            }

@@ -1,0 +1,28 @@
+# research-starter-kit/requirements.txt
+# --- 基本数値計算 ---
+numpy==1.26.4          # 1.26 系最終安定版 (Python3.10+)
+scipy==1.13.1           # NumPy 1.26 と互換
+pandas==2.2.2           # 2.2 系最新安定版
+
+# --- データ入出力 ---
+pyedflib==0.1.34        # EDF 生体信号読み取り。HDF5/NumPy1.26互換
+
+# --- 機械学習・深層学習 ---
+scikit-learn==1.5.0     # 1.5 系安定版
+torch==2.3.1            # CUDA12.1対応ビルドあり (pipでcu121 wheelを指定)
+torchvision==0.18.1     # torch 2.3 系対応
+torchaudio==2.3.1       # torch 2.3 系対応
+# tensorflow==2.17.0    # ★必要な場合のみ追加。GPU版は環境依存が大きいため標準では外す
+
+# --- 実験管理 ---
+wandb==0.17.4           # 2025Q3安定版。API変更少なめ
+
+# --- 可視化 ---
+matplotlib==3.9.1       # NumPy1.26/Python3.10互換
+seaborn==0.13.2         # matplotlib 3.9 と互換
+
+# --- 品質管理・開発補助 ---
+pytest==8.2.2           # Py3.10〜3.12対応
+black==24.8.0           # 2024LTS
+isort==5.13.2           # Black 24系と互換
+pdoc==14.1.0            # ドキュメント自動生成ツール

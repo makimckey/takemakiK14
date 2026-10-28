@@ -1,0 +1,9 @@
+Host gateway
+	HostName <gateway ip>
+	User <Username>		
+	IdentityFile ~/.ssh/id_ed25519
+
+Host workstation
+	HostName <workstation ip>
+	User <Username>
+	ProxyJump gateway

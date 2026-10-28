@@ -1,0 +1,41 @@
+info:
+  name: SleepCAM-LeakyReLU
+  desc: 活性化関数に LeakyReLU を用いた SleepCAM の訓練設定．
+
+dataset:
+  cohort_dir: /data/ise_data
+  cohort_id: physionet2018
+  limit: 20  # 正解付き記録数。全件はnull（メモリ使用量に注意）。
+  cv:
+    n_folds: 5
+    seed: 42
+    shuffle_subjects: true
+  channel_set: [EEG_C3-R, EEG_C4-R, EOG_LOC-R, EMG_L-EMG_R]
+  window_sec: 30.0
+  stride_sec: 30.0
+  y_spec: stages(latest)
+  normalization: record-wise
+  exclude_labels: [-1]
+
+model:
+  arch: custom_sleep_cam
+  config:
+    input_channels: 4
+    activation: LeakyReLU
+
+training:
+  seed: 42
+  lr: "5e-6"
+  batch_size: 32
+  max_epochs: 100
+  loss:
+    name: cross_entropy
+    args: null
+
+  model_checkpoint:
+    monitor: val_loss
+    mode: min
+  early_stopping:
+    monitor: val_loss
+    mode: min
+    patience: 3
